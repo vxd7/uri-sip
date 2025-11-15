@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'sip/version'
+require_relative 'sip/rfc3261_parser'
 require 'uri'
 
 module URI # :nodoc:
@@ -19,30 +20,7 @@ module URI # :nodoc:
       headers
     ].freeze
 
-    ESCAPED = RFC2396_REGEXP::PATTERN::ESCAPED
-    UNRESERVED = RFC2396_REGEXP::PATTERN::UNRESERVED
-
-    PARAM_UNRESERVED = '\[\]/:&+$'
-    PARAMCHAR = "#{ESCAPED}|[#{UNRESERVED}#{PARAM_UNRESERVED}]".freeze
-    PNAME = "(?:#{PARAMCHAR})+".freeze
-    PVALUE = PNAME
-    URI_PARAMETER_REGEX = Regexp.new(
-      "(?<pname>#{PNAME})(?:=(?<pvalue>#{PVALUE}))?"
-    )
-    URI_PARAMETERS_REGEX = Regexp.new(
-      "(?:;#{URI_PARAMETER_REGEX})*"
-    )
-
-    HNV_UNRESERVED = '\[\]/?:+$'
-    HCHAR = "#{ESCAPED}|[#{UNRESERVED}#{HNV_UNRESERVED}]".freeze
-    HNAME = "(?:#{HCHAR})+".freeze
-    HVALUE = "(?:#{HCHAR})*".freeze
-    HEADER_REGEX = Regexp.new(
-      "(?<hname>#{HNAME})=(?<hvalue>#{HVALUE})"
-    )
-    HEADERS_REGEX = Regexp.new(
-      "\\?#{HEADER_REGEX}(?:&#{HEADER_REGEX})*"
-    )
+    attr_reader :headers, :params
 
     # Create new URI::SIP object from components
     #
@@ -57,6 +35,21 @@ module URI # :nodoc:
 
       @params = []
       @headers = []
+
+      parse_params(@opaque)
+      parse_headers(@opaque)
+    end
+
+    def parse_params(str)
+      params_idx = str.index(URI_PARAMETERS_REGEX)
+      headers_idx = str.index(HEADERS_REGEX)
+      return unless params_idx
+
+      headers_idx ||= -1
+      @params = str[params_idx..headers_idx].scan(URI_PARAMETER_REGEX).to_h
+    end
+
+    def parse_headers(str)
     end
   end
 
