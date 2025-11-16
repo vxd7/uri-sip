@@ -5,8 +5,8 @@ module URI
     class RFC3261_Parser # rubocop:disable Naming/ClassAndModuleCamelCase
       ALPHA = 'a-zA-Z'
       ALNUM = "#{ALPHA}\\d".freeze
-      HEX     = 'a-fA-F\\d'
-      ESCAPED = "%[#{HEX}]{2}".freeze
+      HEXDIGIT = '\\h'
+      ESCAPED = "%#{HEXDIGIT}{2}".freeze
       UNRESERVED = "\\-_.!~*'()#{ALNUM}".freeze
 
       PARAM_UNRESERVED = '\[\]/:&+$'
@@ -34,14 +34,24 @@ module URI
       TOPLABEL = "(?:[#{ALPHA}](?:[-#{ALNUM}]*[#{ALNUM}])?)".freeze
       HOSTNAME = "(?:#{DOMLABEL}\\.)*#{TOPLABEL}\\.?".freeze
 
-      IPV4ADDR = '\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}'
+      # RFC5954 corrections to the IPv6 and IPv4 ABNF rules
+      #
+      DEC_OCTET = '(?:[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5]|\\d)'
+      IPV4ADDR = "#{DEC_OCTET}\\.#{DEC_OCTET}\\.#{DEC_OCTET}\\.#{DEC_OCTET}".freeze
+      H16 = "#{HEXDIGIT}{1,4}".freeze
+      LS32 = "(?:#{H16}:#{H16}|#{IPV4ADDR})".freeze
+      IPV6ADDR =
+        "(?:#{H16}:){6}#{LS32}" \
+        "|::(?:#{H16}:){5}#{LS32}" \
+        "|#{H16}?::(?:#{H16}:){4}#{LS32}" \
+        "|(?:(?:#{H16}:)?#{H16})?::(?:#{H16}:){3}#{LS32}" \
+        "|(?:(?:#{H16}:){,2}#{H16})?::(?:#{H16}:){2}#{LS32}" \
+        "|(?:(?:#{H16}:){,3}#{H16})?::#{H16}:#{LS32}" \
+        "|(?:(?:#{H16}:){,4}#{H16})?::#{LS32}" \
+        "|(?:(?:#{H16}:){,5}#{H16})?::#{H16}" \
+        "|(?:(?:#{H16}:){,6}#{H16})?::".freeze
 
-      HEX4 = "[#{HEX}]{1,4}".freeze
-      LASTPART = "(?:#{HEX4}|#{IPV4ADDR})".freeze
-      HEXSEQ1 = "(?:#{HEX4}:)*#{HEX4}".freeze
-      HEXSEQ2 = "(?:#{HEX4}:)*#{LASTPART}".freeze
-      IPV6ADDR = "(?:#{HEXSEQ2}|(?:#{HEXSEQ1})?::(?:#{HEXSEQ2})?)".freeze
-      IPV6REF  = "\\[#{IPV6ADDR}\\]".freeze
+      IPV6REF = "\\[#{IPV6ADDR}\\]".freeze
       HOST = "(?:#{HOSTNAME}|#{IPV4ADDR}|#{IPV6REF})".freeze
 
       PORT = '\d*'
