@@ -13,14 +13,14 @@ module URI
       PARAMCHAR = "#{ESCAPED}|[#{UNRESERVED}#{PARAM_UNRESERVED}]".freeze
       PNAME = "(?:#{PARAMCHAR})+".freeze
       PVALUE = PNAME
-      URI_PARAMETER = "(?<pname>#{PNAME})(?:=(?<pvalue>#{PVALUE}))?".freeze
-      URI_PARAMETERS = "(?:;#{URI_PARAMETER})+".freeze
+      URI_PARAMETER = "(?:#{PNAME})(?:=#{PVALUE})?".freeze
+      URI_PARAMETERS = "(?:;#{URI_PARAMETER})*".freeze
 
       HNV_UNRESERVED = '\[\]/?:+$'
       HCHAR = "#{ESCAPED}|[#{UNRESERVED}#{HNV_UNRESERVED}]".freeze
       HNAME = "(?:#{HCHAR})+".freeze
       HVALUE = "(?:#{HCHAR})*".freeze
-      HEADER = "(?<hname>#{HNAME})=(?<hvalue>#{HVALUE})".freeze
+      HEADER = "(?:#{HNAME})=(?:#{HVALUE})".freeze
       HEADERS = "\\?#{HEADER}(?:&#{HEADER})*".freeze
 
       USER_UNRESERVED = '&=+$,;?/'
