@@ -30,26 +30,19 @@ module URI # :nodoc:
       super(tmp)
     end
 
+    def self.parse(sipuri)
+      RFC3261_Parser.new.parse(sipuri)
+    end
+
     def initialize(*args)
       super(*args)
 
-      @params = []
-      @headers = []
-
-      parse_params(@opaque)
-      parse_headers(@opaque)
-    end
-
-    def parse_params(str)
-      params_idx = str.index(URI_PARAMETERS_REGEX)
-      headers_idx = str.index(HEADERS_REGEX)
-      return unless params_idx
-
-      headers_idx ||= -1
-      @params = str[params_idx..headers_idx].scan(URI_PARAMETER_REGEX).to_h
-    end
-
-    def parse_headers(str)
+      # SIP URIs are considered as 'opaque' by base
+      # URI parser and not parsed;
+      #
+      # Parse them additionally there
+      #
+      self.class.parse("#{@scheme}:#{@opaque}")
     end
   end
 

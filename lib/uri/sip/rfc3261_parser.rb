@@ -28,7 +28,7 @@ module URI
       USER = "(?:#{USERCHAR})+".freeze
       PASSWORDCHAR = "#{ESCAPED}|[#{UNRESERVED}&=+$,]".freeze
       PASSWORD = "(?:#{PASSWORDCHAR})*".freeze
-      USERINFO = "#{USER}(?::#{PASSWORD})?@".freeze
+      USERINFO = "(?<userinfo>#{USER}(?::#{PASSWORD})?)@".freeze
 
       DOMLABEL = "(?:[#{ALNUM}](?:[-#{ALNUM}]*[#{ALNUM}])?)".freeze
       TOPLABEL = "(?:[#{ALPHA}](?:[-#{ALNUM}]*[#{ALNUM}])?)".freeze
@@ -51,28 +51,35 @@ module URI
         "|(?:(?:#{H16}:){,5}#{H16})?::#{H16}" \
         "|(?:(?:#{H16}:){,6}#{H16})?::".freeze
 
-      IPV6REF = "\\[#{IPV6ADDR}\\]".freeze
-      HOST = "(?:#{HOSTNAME}|#{IPV4ADDR}|#{IPV6REF})".freeze
-
+      IPV6REF = "\\[(?:#{IPV6ADDR})\\]".freeze
+      HOST = "(?:#{HOSTNAME})|(?:#{IPV4ADDR})|(?:#{IPV6REF})".freeze
       PORT = '\d*'
-      HOSTPORT = "#{HOST}(?::#{PORT})?".freeze
+      HOSTPORT = "(?<host>#{HOST})(?::(?<port>#{PORT}))?".freeze
+
+      SCHEME = '(?:sip|sips)'
 
       SIP_URI =
-        "(?<userinfo>#{USERINFO})?" \
-        "(?<hostport>#{HOSTPORT})" \
+        "(?<scheme>#{SCHEME}):" \
+        "(?:#{USERINFO})?" \
+        "(?:#{HOSTPORT})" \
         "(?<uri_parameters>#{URI_PARAMETERS})" \
         "(?<headers>#{HEADERS})?".freeze
 
       SIP_URI_REGEX = Regexp.new(
-        "\\Asip:#{SIP_URI}\\z"
-      )
-
-      SIPS_URI_REGEX = Regexp.new(
-        "\\Asips:#{SIP_URI}\\z"
+        "\\A#{SIP_URI}\\z"
       )
 
       def split(str)
-        str.match(SIP_URI)
+        result = str.match(SIP_URI_REGEX)
+
+        [
+          result[:scheme],
+          result[:userinfo],
+          result[:host],
+          result[:port],
+          result[:uri_parameters],
+          result[:headers]
+        ]
       end
     end
   end

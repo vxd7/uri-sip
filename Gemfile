@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'debug', '>= 1.0.0'
 gem 'irb'
 gem 'minitest', '~> 5.16'
 gem 'rake', '~> 13.0'
