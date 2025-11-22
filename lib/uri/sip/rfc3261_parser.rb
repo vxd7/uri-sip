@@ -9,6 +9,12 @@ module URI
       ESCAPED = "%#{HEXDIGIT}{2}".freeze
       UNRESERVED = "\\-_.!~*'()#{ALNUM}".freeze
 
+      # SIP URI params:
+      #
+      # ;lr
+      # ;param1;param2;param3=value3;param4
+      # ;param_name=param_value
+      #
       PARAM_UNRESERVED = '\[\]/:&+$'
       PARAMCHAR = "#{ESCAPED}|[#{UNRESERVED}#{PARAM_UNRESERVED}]".freeze
       PNAME = "(?:#{PARAMCHAR})+".freeze
@@ -16,6 +22,13 @@ module URI
       URI_PARAMETER = "(?:#{PNAME})(?:=#{PVALUE})?".freeze
       URI_PARAMETERS = "(?:;#{URI_PARAMETER})*".freeze
 
+      # SIP URI headers:
+      #
+      # ?HEADER1=VALUE1&HEADER2=VALUE2
+      # ?HEADER1=VALUE1&HEADER2=
+      # ?HEADER1=&HEADER2=VALUE2
+      # ?HEADER1=
+      #
       HNV_UNRESERVED = '\[\]/?:+$'
       HCHAR = "#{ESCAPED}|[#{UNRESERVED}#{HNV_UNRESERVED}]".freeze
       HNAME = "(?:#{HCHAR})+".freeze
@@ -23,6 +36,9 @@ module URI
       HEADER = "(?:#{HNAME})=(?:#{HVALUE})".freeze
       HEADERS = "\\?#{HEADER}(?:&#{HEADER})*".freeze
 
+      # TODO: RFC3261 allows telephone-subscriber scheme to be included
+      # in SIP URI userinfo part
+      #
       USER_UNRESERVED = '&=+$,;?/'
       USERCHAR = "#{ESCAPED}|[#{UNRESERVED}|#{USER_UNRESERVED}]".freeze
       USER = "(?:#{USERCHAR})+".freeze
